@@ -2,7 +2,7 @@
 
 A game Digital Huarongdao in terminal, written by Haskell.  
 
-Play by entering `W`(up) `A`(left) `S`(down) `D`(right) and `Enter` to move the digit till the table to be  
+Play by entering `W`(up) `A`(left) `S`(down) `D`(right) and `Enter` to move the number till the table is  
 
 |       |       |       |       |  
 | :---  |:----: |:----: |  ---: |
