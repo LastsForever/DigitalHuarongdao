@@ -1,4 +1,4 @@
-# DigitalHuarongdao
+# Digital Huarongdao
 
 A game Digital Huarongdao in terminal, written by Haskell (cross platform).  
 
