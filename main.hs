@@ -54,9 +54,10 @@ getRandomActions :: Times -> IO [Direction]
 getRandomActions times = sequence [toEnum <$> randomRIO (fromEnum MoveUp, fromEnum MoveRight) | _ <- [1..times]]
 
 showTable :: (Location, Table) -> IO (Location, Table)
-showTable (location, table) = do
+showTable (location, table) = 
     cleanScreen
-    putStrLn ("\n\n" ++ stringTable ++ "\n\n") >> return (location, table)
+    >> putStrLn ("\n\n" ++ stringTable ++ "\n\n") 
+    >> return (location, table)
         where   stringTable = joinWith "\n\n\n\n" . map (joinWith "\t") $ table
                 joinWith sep = foldl1 (\x y -> x ++ sep ++ y)
 
