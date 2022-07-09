@@ -25,11 +25,11 @@ innitialTable = [ ["  1",  "  2",  "  3",  "  4"]
 
 getDirectionFrom :: Command -> Direction
 getDirectionFrom input
-    | input == 'W' || input == 'w' = MoveUp
-    | input == 'S' || input == 's' = MoveDown
-    | input == 'A' || input == 'a' = MoveLeft
-    | input == 'D' || input == 'd' = MoveRight
-    | otherwise                    = StayMiddle
+    | input `elem` "wW" = MoveUp
+    | input `elem` "sS" = MoveDown
+    | input `elem` "aA" = MoveLeft
+    | input `elem` "dD" = MoveRight
+    | otherwise         = StayMiddle
 
 move :: (Location, Table) -> Direction -> (Location, Table)
 move (location@Location {x = x0, y = y0}, table) direction = (newLocation, newTable)
