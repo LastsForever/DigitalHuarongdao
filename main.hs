@@ -17,6 +17,12 @@ type Times = Int
 data Direction = MoveUp | MoveDown | MoveLeft | MoveRight | StayMiddle deriving (Enum, Eq)
 data Location = Location {x::Int, y::Int}
 
+innitialLocation = Location {x=3, y=3}
+innitialTable = [ ["  1",  "  2",  "  3",  "  4"]
+                , ["  5",  "  6",  "  7",  "  8"]
+                , ["  9",  " 10",  " 11",  " 12"]
+                , [" 13",  " 14",  " 15",  "   "] ]
+
 getDirectionFrom :: Command -> Direction
 getDirectionFrom input
     | input == 'W' || input == 'w' = MoveUp
@@ -41,11 +47,16 @@ move (location@Location {x = x0, y = y0}, table) direction = (newLocation, newTa
                         targetCell = table !! y newLocation !! x newLocation
                         originCell = table !! y location    !! x location
 
+cleanScreen :: IO ()
+cleanScreen = callCommand CLEAN_SCREEN_COMMAND
 
-showTable :: Table -> IO ()
-showTable table = do
+getRandomActions :: Times -> IO [Direction]
+getRandomActions times = sequence [toEnum <$> randomRIO (fromEnum MoveUp, fromEnum MoveRight) | _ <- [1..times]]
+
+showTable :: (Location, Table) -> IO (Location, Table)
+showTable (location, table) = do
     cleanScreen
-    putStrLn $ "\n\n" ++ stringTable ++ "\n\n"
+    putStrLn ("\n\n" ++ stringTable ++ "\n\n") >> return (location, table)
         where   stringTable = joinWith "\n\n\n\n" . map (joinWith "\t") $ table
                 joinWith sep = foldl1 (\x y -> x ++ sep ++ y)
 
@@ -54,35 +65,26 @@ getActionLoop (location, table) = do
     input <- getChar
     let direction = getDirectionFrom input
     let (newLocation, newTable) = move (location, table) direction
-    showTable newTable
+    showTable (newLocation, newTable)
     if newTable == innitialTable then return () else getActionLoop (newLocation, newTable)
 
-cleanScreen :: IO ()
-cleanScreen = callCommand CLEAN_SCREEN_COMMAND
-
-getRandomActions :: Times -> IO [Direction]
-getRandomActions times = sequence [toEnum <$> randomRIO (fromEnum MoveUp, fromEnum MoveRight) | _ <- [1..times]]
-
-innitialLocation = Location {x=3, y=3}
-innitialTable = [ ["  1",  "  2",  "  3",  "  4"]
-                , ["  5",  "  6",  "  7",  "  8"]
-                , ["  9",  " 10",  " 11",  " 12"]
-                , [" 13",  " 14",  " 15",  "   "] ]
+askIfContinue :: IO ()
+askIfContinue = do
+    _ <- getLine
+    putStrLn "Well Done!\n\nContinue? ([Y] Yes, default; [N] No.)"
+    answer <- getChar
+    if  | answer `elem` "Yy\n"  ->  gameStart
+        | answer `elem` "NnQq"  ->  putStrLn "Bye!"
+        | otherwise             ->  askIfContinue
 
 gameStart :: IO ()
-gameStart = do
+gameStart =
     cleanScreen
-    (currentLocation, currentTable) <- foldl move (innitialLocation, innitialTable) <$> getRandomActions 369
-    showTable currentTable
-    getActionLoop (currentLocation, currentTable)
-    askIfContinue
-        where   askIfContinue = do
-                    _ <- getLine
-                    putStrLn "Well Done!\n\nContinue? ([Y] Yes, default; [N] No.)"
-                    answer <- getChar
-                    if  | answer `elem` "Yy\n"  ->  gameStart
-                        | answer `elem` "NnQq"  ->  putStrLn "Bye!"
-                        | otherwise             ->  askIfContinue
+    >>  foldl move (innitialLocation, innitialTable) <$> getRandomActions 369
+    >>= showTable
+    >>= getActionLoop
+    >>  askIfContinue
+
 
 main :: IO ()
 main = gameStart
