@@ -62,21 +62,22 @@ showTable (location, table) =
                 joinWith sep = foldl1 (\x y -> x ++ sep ++ y)
 
 getActionLoop :: (Location, Table) -> IO ()
-getActionLoop (location, table) = do
-    input <- getChar
-    let direction = getDirectionFrom input
-    let (newLocation, newTable) = move (location, table) direction
-    showTable (newLocation, newTable)
-    if newTable == innitialTable then return () else getActionLoop (newLocation, newTable)
+getActionLoop (location, table) =
+    getChar
+    >>= return . getDirectionFrom
+    >>= return . move (location, table)
+    >>= showTable
+    >>= \(newLocation, newTable) ->
+            if newTable == innitialTable then return () else getActionLoop (newLocation, newTable)
 
 askIfContinue :: IO ()
-askIfContinue = do
-    _ <- getLine
-    putStrLn "Well Done!\n\nContinue? ([Y] Yes, default; [N] No.)"
-    answer <- getChar
-    if  | answer `elem` "Yy\n"  ->  gameStart
-        | answer `elem` "NnQq"  ->  putStrLn "Bye!"
-        | otherwise             ->  askIfContinue
+askIfContinue =
+    getLine
+    >>  putStrLn "Well Done!\n\nContinue? ([Y] Yes, default; [N] No.)"
+    >>  getChar
+    >>= \answer ->  if  | answer `elem` "Yy\n"  ->  gameStart
+                        | answer `elem` "NnQq"  ->  putStrLn "Bye!"
+                        | otherwise             ->  askIfContinue
 
 gameStart :: IO ()
 gameStart =
